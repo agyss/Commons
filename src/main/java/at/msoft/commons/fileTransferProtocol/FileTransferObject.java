@@ -9,11 +9,11 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import at.msoft.commons.fileTransferProtocol.Interfaces.IChatImagesAnswer;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForSharing;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForUser;
 import at.msoft.commons.fileTransferProtocol.Interfaces.IChatImagesRequest;
 import at.msoft.commons.fileTransferProtocol.Interfaces.IFileTransferSpecifierObject;
 import at.msoft.commons.fileTransferProtocol.Interfaces.IGalleryImageRequest;
+import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForSharing;
+import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForUser;
 import at.msoft.commons.fileTransferProtocol.Interfaces.IImageRequestAnswer;
 
 public final class FileTransferObject implements Serializable {
@@ -189,7 +189,6 @@ public final class FileTransferObject implements Serializable {
 
     private void receiveImagesChatRequest() {
         specifiedObject = new IChatImagesRequest() {
-            @Override
             public String getRequester() {
                 return senders[0];
             }
@@ -199,7 +198,6 @@ public final class FileTransferObject implements Serializable {
     private void receiveImagesChatAnswer(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         receiveMultipleImages(ois);
         specifiedObject = new IChatImagesAnswer() {
-            @Override
             public UserImageTriple[] getImages() {
                 return wrapImagesInTriples();
             }
@@ -218,7 +216,6 @@ public final class FileTransferObject implements Serializable {
     private void receiveAnswerImagesForGallery(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         receiveMultipleImages(ois);
         specifiedObject = new IImageRequestAnswer() {
-            @Override
             public UserImageTriple[] getImages() {
                 return wrapImagesInTriples();
             }
@@ -228,12 +225,10 @@ public final class FileTransferObject implements Serializable {
     private void receiveImagesForGalleryRequest(ObjectInputStream ois) throws IOException {
         amount = ois.readInt();
         specifiedObject = new IGalleryImageRequest() {
-            @Override
             public int getAmountRequested() {
                 return amount;
             }
 
-            @Override
             public String getRequester() {
                 return senders[0];
             }
@@ -244,22 +239,18 @@ public final class FileTransferObject implements Serializable {
         receiver = (String) ois.readObject();
         receiveMultipleImages(ois);
         specifiedObject = new IImageForUser() {
-            @Override
             public String getSender() {
                 return senders[0];
             }
 
-            @Override
             public String getReceiver() {
                 return receiver;
             }
 
-            @Override
             public String getFileName() {
                 return fileNames[0];
             }
 
-            @Override
             public byte[] getImageBytes() {
                 return data[0];
             }
@@ -269,17 +260,14 @@ public final class FileTransferObject implements Serializable {
     private void receiveImageForSharing(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         receiveMultipleImages(ois);
         specifiedObject = new IImageForSharing() {
-            @Override
             public String getSender() {
                 return senders[0];
             }
 
-            @Override
             public String getFileName() {
                 return fileNames[0];
             }
 
-            @Override
             public byte[] getImageBytes() {
                 return data[0];
             }

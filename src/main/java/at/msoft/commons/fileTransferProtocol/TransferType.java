@@ -1,4 +1,4 @@
-package at.msoft.commons;
+package at.msoft.commons.fileTransferProtocol;
 
 import java.io.Serializable;
 

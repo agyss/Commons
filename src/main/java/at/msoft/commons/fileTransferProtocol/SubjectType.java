@@ -1,4 +1,4 @@
-package at.msoft.commons;
+package at.msoft.commons.fileTransferProtocol;
 
 /**
  * Created by Andreas on 09.11.2016.
