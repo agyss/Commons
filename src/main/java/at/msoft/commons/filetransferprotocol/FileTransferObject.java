@@ -1,4 +1,4 @@
-package at.msoft.commons.fileTransferProtocol;
+package at.msoft.commons.filetransferprotocol;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,13 +8,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import at.msoft.commons.fileTransferProtocol.Interfaces.IChatImagesAnswer;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForSharing;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForUser;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IChatImagesRequest;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IFileTransferSpecifierObject;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IGalleryImageRequest;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IImageRequestAnswer;
+import at.msoft.commons.filetransferprotocol.interfaces.IChatImagesAnswer;
+import at.msoft.commons.filetransferprotocol.interfaces.IImageForSharing;
+import at.msoft.commons.filetransferprotocol.interfaces.IImageForUser;
+import at.msoft.commons.filetransferprotocol.interfaces.IChatImagesRequest;
+import at.msoft.commons.filetransferprotocol.interfaces.IFileTransferSpecifierObject;
+import at.msoft.commons.filetransferprotocol.interfaces.IGalleryImageRequest;
+import at.msoft.commons.filetransferprotocol.interfaces.IImageRequestAnswer;
 
 public final class FileTransferObject implements Serializable {
     private static final long serialVersionUID = -6494199107223929245L;

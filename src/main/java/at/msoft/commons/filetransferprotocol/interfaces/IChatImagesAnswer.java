@@ -1,6 +1,6 @@
-package at.msoft.commons.fileTransferProtocol.Interfaces;
+package at.msoft.commons.filetransferprotocol.interfaces;
 
-import at.msoft.commons.fileTransferProtocol.UsernameImageTriple;
+import at.msoft.commons.filetransferprotocol.UsernameImageTriple;
 
 /**
  * Created by Andreas on 28.11.2016.

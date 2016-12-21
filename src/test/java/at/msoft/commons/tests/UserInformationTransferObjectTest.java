@@ -17,7 +17,7 @@ import java.io.ObjectOutputStream;
 import java.util.Calendar;
 import java.util.Random;
 
-import at.msoft.commons.fileTransferProtocol.UserInformationTransferObject;
+import at.msoft.commons.filetransferprotocol.UserInformationTransferObject;
 
 /**
  * Created by Andreas on 20.12.2016.

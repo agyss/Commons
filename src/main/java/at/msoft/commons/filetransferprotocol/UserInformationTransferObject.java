@@ -1,4 +1,4 @@
-package at.msoft.commons.fileTransferProtocol;
+package at.msoft.commons.filetransferprotocol;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -18,18 +18,18 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
-import at.msoft.commons.fileTransferProtocol.FileTransferObject;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IChatImagesAnswer;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IChatImagesRequest;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IFileTransferSpecifierObject;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IGalleryImageRequest;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForSharing;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForUser;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IImageRequestAnswer;
-import at.msoft.commons.fileTransferProtocol.TransferType;
-import at.msoft.commons.fileTransferProtocol.UserInformationImageTriple;
-import at.msoft.commons.fileTransferProtocol.UsernameImageTriple;
-import at.msoft.commons.fileTransferProtocol.UserInformationTransferObject;
+import at.msoft.commons.filetransferprotocol.FileTransferObject;
+import at.msoft.commons.filetransferprotocol.interfaces.IChatImagesAnswer;
+import at.msoft.commons.filetransferprotocol.interfaces.IChatImagesRequest;
+import at.msoft.commons.filetransferprotocol.interfaces.IFileTransferSpecifierObject;
+import at.msoft.commons.filetransferprotocol.interfaces.IGalleryImageRequest;
+import at.msoft.commons.filetransferprotocol.interfaces.IImageForSharing;
+import at.msoft.commons.filetransferprotocol.interfaces.IImageForUser;
+import at.msoft.commons.filetransferprotocol.interfaces.IImageRequestAnswer;
+import at.msoft.commons.filetransferprotocol.TransferType;
+import at.msoft.commons.filetransferprotocol.UserInformationImageTriple;
+import at.msoft.commons.filetransferprotocol.UsernameImageTriple;
+import at.msoft.commons.filetransferprotocol.UserInformationTransferObject;
 
 /**
  * Created by Andreas on 29.11.2016.
