@@ -211,27 +211,30 @@ public final class FileTransferObject implements Serializable {
         receiveMultipleImages(ois);
         specifiedObject = new IChatImagesAnswer() {
             @Override
-            public UserImageTriple[] getImages() {
-                return wrapImagesInTriples();
+            public UsernameImageTriple[] getImages() {
+                UsernameImageTriple[] triples = new UsernameImageTriple[fileNames.length];
+
+                for (int i = 0; i < fileNames.length; i++) {
+                    triples[i] = new UsernameImageTriple(senders[i], fileNames[i], data[i]);
+                }
+
+                return triples;
             }
         };
-    }
-
-    private UserImageTriple[] wrapImagesInTriples() {
-        UserImageTriple[] triples = new UserImageTriple[fileNames.length];
-        for (int i = 0; i < fileNames.length; i++) {
-            triples[i] = new UserImageTriple(senderInformation[i], fileNames[i], data[i]);
-        }
-
-        return triples;
     }
 
     private void receiveAnswerImagesForGallery(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         receiveMultipleImages(ois);
         specifiedObject = new IImageRequestAnswer() {
             @Override
-            public UserImageTriple[] getImages() {
-                return wrapImagesInTriples();
+            public UserInformationImageTriple[] getImages() {
+                UserInformationImageTriple[] triples = new UserInformationImageTriple[fileNames.length];
+
+                for (int i = 0; i < fileNames.length; i++) {
+                    triples[i] = new UserInformationImageTriple(senderInformation[i], fileNames[i], data[i]);
+                }
+
+                return triples;
             }
         };
     }

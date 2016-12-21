@@ -14,6 +14,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Random;
 
 import at.msoft.commons.fileTransferProtocol.FileTransferObject;
@@ -25,20 +27,23 @@ import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForSharing;
 import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForUser;
 import at.msoft.commons.fileTransferProtocol.Interfaces.IImageRequestAnswer;
 import at.msoft.commons.fileTransferProtocol.TransferType;
-import at.msoft.commons.fileTransferProtocol.UserImageTriple;
+import at.msoft.commons.fileTransferProtocol.UserInformationImageTriple;
+import at.msoft.commons.fileTransferProtocol.UsernameImageTriple;
+import at.msoft.commons.fileTransferProtocol.UserInformationTransferObject;
 
 /**
  * Created by Andreas on 29.11.2016.
  */
-class FileTransferObjectTest {
+public class FileTransferObjectTest {
     private static File[] files;
     private static byte[][] pictures;
     private File[] tempFiles;
-    private String[] senders = new String[] {"Jakob", "Hans", "Peter", "Martin", "Thomas", "Ehrenfried", "Justus", "Mark", "Tobias", "Dominik"};
-    private String[] receivers = new String[] {"Elisabeth", "Susanna", "Pia", "Bettina", "Jana", "Elena", "Nicole", "Sabrina", "Marlene", "Edith"};
+    private String[] senders = new String[]{"Jakob", "Hans", "Peter", "Martin", "Thomas", "Ehrenfried", "Justus", "Mark", "Tobias", "Dominik"};
+    private String[] receivers = new String[]{"Elisabeth", "Susanna", "Pia", "Bettina", "Jana", "Elena", "Nicole", "Sabrina", "Marlene", "Edith"};
+    private static final String profilePictureName = "profilePicture";
 
     @BeforeClass
-    static void initialize() {
+    public static void initialize() {
         Random r = new Random();
         pictures = new byte[10][640 * 800];
         String[] names = new String[pictures.length];
@@ -65,19 +70,42 @@ class FileTransferObjectTest {
                 }
             }
         }
+
+        byte[] profilePicture = new byte[1920 * 1080];
+        r.nextBytes(profilePicture);
+
+        try {
+            fos = new FileOutputStream(profilePictureName);
+            fos.write(profilePicture);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     @AfterClass
-    static void cleanUp() {
+    public static void cleanUp() {
         for (File file : files) {
             if (file.exists()) {
                 file.delete();
             }
         }
+
+        File profilePicture = new File(profilePictureName);
+        if (profilePicture.exists()) {
+            profilePicture.delete();
+        }
     }
 
     @Before
-    void beforeEach() {
+    public void beforeEach() {
         tempFiles = new File[files.length];
         for (int i = 0; i < tempFiles.length; i++) {
             String name = "temp" + files[i].getName();
@@ -86,7 +114,7 @@ class FileTransferObjectTest {
     }
 
     @After
-    void afterEach() {
+    public void afterEach() {
         for (File x : tempFiles) {
             if (x.exists()) {
                 x.delete();
@@ -94,18 +122,15 @@ class FileTransferObjectTest {
         }
     }
 
-    private void writeFTO(FileTransferObject fto, File target)
-    {
+    private void writeFTO(FileTransferObject fto, File target) {
         ObjectOutputStream oos = null;
         try {
             oos = new ObjectOutputStream(new FileOutputStream(target));
             oos.writeObject(fto);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        finally {
-            if(oos != null)
-            {
+        } finally {
+            if (oos != null) {
                 try {
                     oos.close();
                 } catch (IOException e) {
@@ -115,8 +140,7 @@ class FileTransferObjectTest {
         }
     }
 
-    private FileTransferObject readFTO(File source)
-    {
+    private FileTransferObject readFTO(File source) {
         FileTransferObject returnObject = null;
         ObjectInputStream ois = null;
         try {
@@ -125,8 +149,7 @@ class FileTransferObjectTest {
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
-            if(ois != null)
-            {
+            if (ois != null) {
                 try {
                     ois.close();
                 } catch (IOException e) {
@@ -138,16 +161,14 @@ class FileTransferObjectTest {
         return returnObject;
     }
 
-    private FileTransferObject getFileTransferObject(TransferType transferType)
-    {
+    private FileTransferObject getFileTransferObject(TransferType transferType) {
         FileTransferObject fto = null;
-        switch (transferType)
-        {
+        switch (transferType) {
             case ANSWER_IMAGES_CHAT:
-                fto =  FileTransferObject.getAnswerImagesForChatFTO(new String[]{files[0].getAbsolutePath(), files[1].getAbsolutePath()}, new String[]{senders[0], senders[1]});
+                fto = FileTransferObject.getAnswerImagesForChatFTO(new String[]{files[0].getAbsolutePath(), files[1].getAbsolutePath()}, new String[]{senders[0], senders[1]});
                 break;
             case ANSWER_IMAGES_GALLERY:
-                fto = FileTransferObject.getAnswerImagesForGalleryFTO(new String[]{files[2].getAbsolutePath(), files[3].getAbsolutePath()}, new String[]{senders[2], senders[3]});
+                fto = FileTransferObject.getAnswerImagesForGalleryFTO(new String[]{files[2].getAbsolutePath(), files[3].getAbsolutePath()}, getUITO(new String[]{senders[2], senders[3]}));
                 break;
             case REQUEST_IMAGES_CHAT:
                 fto = FileTransferObject.getRequestImagesForChatFTO(senders[4]);
@@ -169,8 +190,19 @@ class FileTransferObjectTest {
         return fto;
     }
 
+    private UserInformationTransferObject[] getUITO(String[] senders) {
+        UserInformationTransferObject[] uitos = new UserInformationTransferObject[senders.length];
+        Calendar.getInstance().set(1995, Calendar.FEBRUARY, 7);
+        Date date = Calendar.getInstance().getTime();
+        for (int i = 0; i < senders.length; i++) {
+            uitos[i] = new UserInformationTransferObject(senders[i], "AUT", profilePictureName, date);
+        }
+
+        return uitos;
+    }
+
     @Test
-    void getTransferType() {
+    public void getTransferType() {
         int i = 0;
         //Send image for sharing
         FileTransferObject fto = getFileTransferObject(TransferType.SEND_IMAGE_FOR_SHARING);
@@ -223,7 +255,7 @@ class FileTransferObjectTest {
     }
 
     @Test
-    void getSpecifiedObject() {
+    public void getSpecifiedObject() {
         int i = 0;
         //Send image for sharing
         FileTransferObject fto = getFileTransferObject(TransferType.SEND_IMAGE_FOR_SHARING);
@@ -275,7 +307,7 @@ class FileTransferObjectTest {
     }
 
     @Test
-    void getShareImageFTO() {
+    public void getShareImageFTO() {
         FileTransferObject fto = getFileTransferObject(TransferType.SEND_IMAGE_FOR_SHARING);
         writeFTO(fto, tempFiles[0]);
         fto = readFTO(tempFiles[0]);
@@ -288,7 +320,7 @@ class FileTransferObjectTest {
     }
 
     @Test
-    void getImageToUserFTO() {
+    public void getImageToUserFTO() {
         FileTransferObject fto = getFileTransferObject(TransferType.SEND_IMAGE_TO_USER);
         writeFTO(fto, tempFiles[0]);
         fto = readFTO(tempFiles[0]);
@@ -304,7 +336,7 @@ class FileTransferObjectTest {
     }
 
     @Test
-    void getRequestImagesForGalleryFTO() {
+    public void getRequestImagesForGalleryFTO() {
         FileTransferObject fto = getFileTransferObject(TransferType.REQUEST_IMAGES_GALLERY);
         writeFTO(fto, tempFiles[0]);
         fto = readFTO(tempFiles[0]);
@@ -315,7 +347,7 @@ class FileTransferObjectTest {
     }
 
     @Test
-    void getRequestImagesForChatFTO() {
+    public void getRequestImagesForChatFTO() {
         FileTransferObject fto = getFileTransferObject(TransferType.REQUEST_IMAGES_CHAT);
         writeFTO(fto, tempFiles[0]);
         fto = readFTO(tempFiles[0]);
@@ -325,7 +357,7 @@ class FileTransferObjectTest {
     }
 
     @Test
-    void getAnswerImagesForChatFTO() {
+    public void getAnswerImagesForChatFTO() {
         FileTransferObject fto = getFileTransferObject(TransferType.ANSWER_IMAGES_CHAT);
         writeFTO(fto, tempFiles[0]);
         fto = readFTO(tempFiles[0]);
@@ -333,20 +365,20 @@ class FileTransferObjectTest {
         assertThat(answerImages).isNotNull();
         assertThat(2).isEqualTo(answerImages.getImages().length);
 
-        UserImageTriple[] imageTriples = answerImages.getImages();
+        UsernameImageTriple[] imageTriples = answerImages.getImages();
         assertThat(pictures[0]).isEqualTo(imageTriples[0].getImageData());
         assertThat(files[0].length()).isEqualTo(imageTriples[0].getImageData().length);
         assertThat(files[0].getName()).isEqualTo(imageTriples[0].getImageName());
-        assertThat(senders[0]).isEqualTo(imageTriples[0].getImageCreatorInformation());
+        assertThat(senders[0]).isEqualTo(imageTriples[0].getImageCreatorName());
 
         assertThat(pictures[1]).isEqualTo(imageTriples[1].getImageData());
         assertThat(files[1].length()).isEqualTo(imageTriples[1].getImageData().length);
         assertThat(files[1].getName()).isEqualTo(imageTriples[1].getImageName());
-        assertThat(senders[1]).isEqualTo(imageTriples[1].getImageCreatorInformation());
+        assertThat(senders[1]).isEqualTo(imageTriples[1].getImageCreatorName());
     }
 
     @Test
-    void getAnswerImagesForGalleryFTO() {
+    public void getAnswerImagesForGalleryFTO() {
         FileTransferObject fto = getFileTransferObject(TransferType.ANSWER_IMAGES_GALLERY);
         writeFTO(fto, tempFiles[0]);
         fto = readFTO(tempFiles[0]);
@@ -354,21 +386,20 @@ class FileTransferObjectTest {
         assertThat(imagesForGallery).isNotNull();
         assertThat(2).isEqualTo(imagesForGallery.getImages().length);
 
-        UserImageTriple[] imageTriples = imagesForGallery.getImages();
+        UserInformationImageTriple[] imageTriples = imagesForGallery.getImages();
         assertThat(pictures[2]).isEqualTo(imageTriples[0].getImageData());
         assertThat(files[2].length()).isEqualTo(imageTriples[0].getImageData().length);
         assertThat(files[2].getName()).isEqualTo(imageTriples[0].getImageName());
-        assertThat(senders[2]).isEqualTo(imageTriples[0].getImageCreatorInformation());
+        assertThat(senders[2]).isEqualTo(imageTriples[0].getImageCreatorInformations().getUserName());
 
         assertThat(pictures[3]).isEqualTo(imageTriples[1].getImageData());
         assertThat(files[3].length()).isEqualTo(imageTriples[1].getImageData().length);
         assertThat(files[3].getName()).isEqualTo(imageTriples[1].getImageName());
-        assertThat(senders[3]).isEqualTo(imageTriples[1].getImageCreatorInformation());
+        assertThat(senders[3]).isEqualTo(imageTriples[1].getImageCreatorInformations().getUserName());
     }
 
     @Test
-    void getTransferFinishedFTO()
-    {
+    public void getTransferFinishedFTO() {
         FileTransferObject fto = getFileTransferObject(TransferType.TRANSFER_FINISHED);
         writeFTO(fto, tempFiles[0]);
         fto = readFTO(tempFiles[0]);

@@ -3,13 +3,13 @@ package at.msoft.commons.fileTransferProtocol;
 /**
  * Created by Andreas on 28.11.2016.
  */
-public class UserImageTriple extends Triple<UserInformationTransferObject, String, byte[]> {
+public class UsernameImageTriple extends Triple<String, String, byte[]> {
 
-    public UserImageTriple(UserInformationTransferObject uito, String imageName, byte[] imageData) {
-        super(uito, imageName, imageData);
+    public UsernameImageTriple(String userName, String imageName, byte[] imageData) {
+        super(userName, imageName, imageData);
     }
 
-    public UserInformationTransferObject getImageCreatorInformation()
+    public String getImageCreatorName()
     {
         return super.getFirst();
     }

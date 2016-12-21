@@ -14,7 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.Random;
 
 import at.msoft.commons.fileTransferProtocol.UserInformationTransferObject;
@@ -22,12 +22,12 @@ import at.msoft.commons.fileTransferProtocol.UserInformationTransferObject;
 /**
  * Created by Andreas on 20.12.2016.
  */
-class UserInformationTransferObjectTest {
-    UserInformationTransferObject uitObject = null;
-    byte[] imageRawData = null;
+public class UserInformationTransferObjectTest {
+    private UserInformationTransferObject uitObject = null;
+    private static byte[] imageRawData = null;
 
     @BeforeClass
-    void beforeAll() {
+    public static void beforeAll() {
         imageRawData = new byte[1920 * 1080];
         Random r = new Random();
         r.nextBytes(imageRawData);
@@ -50,7 +50,7 @@ class UserInformationTransferObjectTest {
     }
 
     @AfterClass
-    void afterAll() {
+    public static void afterAll() {
         File file = new File("profilePicture");
         if(file.exists())
         {
@@ -60,8 +60,10 @@ class UserInformationTransferObjectTest {
     }
 
     @Before
-    void initialize() {
-        uitObject = new UserInformationTransferObject("user1", "AUT", "profilePicture", new Date(1995, 2, 7));
+    public void initialize() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(1995, Calendar.FEBRUARY, 7);
+        uitObject = new UserInformationTransferObject("user1", "AUT", "profilePicture", cal.getTime());
     }
 
     private UserInformationTransferObject storeAndLoadUITObject()
@@ -112,23 +114,21 @@ class UserInformationTransferObjectTest {
     }
 
     @Test
-    void getUserName() {
-        assertThat("str")
-    }
+    public void simulationTest() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(1995, Calendar.FEBRUARY, 7);
+        assertThat(uitObject.getUserName()).isEqualTo("user1");
+        assertThat(uitObject.getBirthDate()).isEqualTo(cal.getTime());
+        assertThat(uitObject.getCountry()).isEqualTo("AUT");
+        assertThat(uitObject.getImage()).isNull();
 
-    @Test
-    void getCountry() {
+        uitObject = storeAndLoadUITObject();
 
-    }
-
-    @Test
-    void getBirthDate() {
-
-    }
-
-    @Test
-    void getImage() {
-
+        assertThat(uitObject.getUserName()).isEqualTo("user1");
+        assertThat(uitObject.getBirthDate()).isEqualTo(cal.getTime());
+        assertThat(uitObject.getCountry()).isEqualTo("AUT");
+        assertThat(uitObject.getImage()).isNotNull();
+        assertThat(uitObject.getImage()).isEqualTo(imageRawData);
     }
 
 }
