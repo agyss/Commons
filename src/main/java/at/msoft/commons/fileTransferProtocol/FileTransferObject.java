@@ -9,11 +9,11 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import at.msoft.commons.fileTransferProtocol.Interfaces.IChatImagesAnswer;
+import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForSharing;
+import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForUser;
 import at.msoft.commons.fileTransferProtocol.Interfaces.IChatImagesRequest;
 import at.msoft.commons.fileTransferProtocol.Interfaces.IFileTransferSpecifierObject;
 import at.msoft.commons.fileTransferProtocol.Interfaces.IGalleryImageRequest;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForSharing;
-import at.msoft.commons.fileTransferProtocol.Interfaces.IImageForUser;
 import at.msoft.commons.fileTransferProtocol.Interfaces.IImageRequestAnswer;
 
 public final class FileTransferObject implements Serializable {
@@ -22,16 +22,19 @@ public final class FileTransferObject implements Serializable {
     private IFileTransferSpecifierObject specifiedObject = null;
     private TransferType transferType;
     private String[] senders, filePaths, fileNames;
+    private UserInformationTransferObject[] senderInformation;
     private String receiver;
     private int amount;
     private byte[][] data;
 
-    private FileTransferObject(int amount, String[] fullFilePaths, String receiver, String[] senders, TransferType transferType) {
+    private FileTransferObject(int amount, String[] fullFilePaths, String receiver, String[] senders, UserInformationTransferObject[] senderInformation,
+            TransferType transferType) {
         this.amount = amount;
         this.filePaths = fullFilePaths;
         this.receiver = receiver;
         this.senders = senders;
         this.transferType = transferType;
+        this.senderInformation = senderInformation;
         fileNames = fullFilePaths != null ? new String[fullFilePaths.length] : new String[0];
 
         File file;
@@ -54,37 +57,41 @@ public final class FileTransferObject implements Serializable {
 
     public static FileTransferObject getShareImageFTO(String fullFileSource,
             String sender) {
-        return new FileTransferObject(0, new String[]{fullFileSource}, null, new String[]{sender}, TransferType.SEND_IMAGE_FOR_SHARING);
+        return new FileTransferObject(0, new String[]{fullFileSource}, null, new String[]{sender}, null, TransferType.SEND_IMAGE_FOR_SHARING);
     }
 
     public static FileTransferObject getImageToUserFTO(String fullFileSource, String receiver, String sender) {
-        return new FileTransferObject(0, new String[]{fullFileSource}, receiver, new String[]{sender}, TransferType.SEND_IMAGE_TO_USER);
+        return new FileTransferObject(0, new String[]{fullFileSource}, receiver, new String[]{sender}, null, TransferType.SEND_IMAGE_TO_USER);
     }
 
     public static FileTransferObject getRequestImagesForGalleryFTO(String sender, int amount) {
-        return new FileTransferObject(amount, null, null, new String[]{sender}, TransferType.REQUEST_IMAGES_GALLERY);
+        return new FileTransferObject(amount, null, null, new String[]{sender}, null, TransferType.REQUEST_IMAGES_GALLERY);
     }
 
     public static FileTransferObject getRequestImagesForChatFTO(String sender) {
-        return new FileTransferObject(0, null, null, new String[]{sender}, TransferType.REQUEST_IMAGES_CHAT);
+        return new FileTransferObject(0, null, null, new String[]{sender}, null, TransferType.REQUEST_IMAGES_CHAT);
     }
 
     public static FileTransferObject getAnswerImagesForChatFTO(String[] filepaths, String[] senders) {
-        return new FileTransferObject(0, filepaths, null, senders, TransferType.ANSWER_IMAGES_CHAT);
+        return new FileTransferObject(0, filepaths, null, senders, null, TransferType.ANSWER_IMAGES_CHAT);
     }
 
     public static FileTransferObject getAnswerImagesForGalleryFTO(String[] filepaths, UserInformationTransferObject[] senders) {
-        return new FileTransferObject(0, filepaths, null, senders, TransferType.ANSWER_IMAGES_GALLERY);
+        return new FileTransferObject(0, filepaths, null, null, senders, TransferType.ANSWER_IMAGES_GALLERY);
     }
 
     public static FileTransferObject getTransferFinishedFTO() {
-        return new FileTransferObject(0, null, null, null, TransferType.TRANSFER_FINISHED);
+        return new FileTransferObject(0, null, null, null, null, TransferType.TRANSFER_FINISHED);
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
         oos.writeObject(transferType);
         if (transferType != TransferType.TRANSFER_FINISHED) {
-            oos.writeObject(senders);
+            if (transferType != TransferType.ANSWER_IMAGES_GALLERY) {
+                oos.writeObject(senders);
+            } else {
+                oos.writeObject(senderInformation);
+            }
 
             switch (transferType) {
                 case SEND_IMAGE_FOR_SHARING:
@@ -159,7 +166,11 @@ public final class FileTransferObject implements Serializable {
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         transferType = (TransferType) ois.readObject();
         if (transferType != TransferType.TRANSFER_FINISHED) {
-            senders = (String[]) ois.readObject();
+            if (transferType != TransferType.ANSWER_IMAGES_GALLERY) {
+                senders = (String[]) ois.readObject();
+            } else {
+                senderInformation = (UserInformationTransferObject[]) ois.readObject();
+            }
 
             switch (transferType) {
                 case SEND_IMAGE_FOR_SHARING:
@@ -189,6 +200,7 @@ public final class FileTransferObject implements Serializable {
 
     private void receiveImagesChatRequest() {
         specifiedObject = new IChatImagesRequest() {
+            @Override
             public String getRequester() {
                 return senders[0];
             }
@@ -198,6 +210,7 @@ public final class FileTransferObject implements Serializable {
     private void receiveImagesChatAnswer(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         receiveMultipleImages(ois);
         specifiedObject = new IChatImagesAnswer() {
+            @Override
             public UserImageTriple[] getImages() {
                 return wrapImagesInTriples();
             }
@@ -207,7 +220,7 @@ public final class FileTransferObject implements Serializable {
     private UserImageTriple[] wrapImagesInTriples() {
         UserImageTriple[] triples = new UserImageTriple[fileNames.length];
         for (int i = 0; i < fileNames.length; i++) {
-            triples[i] = new UserImageTriple(senders[i], fileNames[i], data[i]);
+            triples[i] = new UserImageTriple(senderInformation[i], fileNames[i], data[i]);
         }
 
         return triples;
@@ -216,6 +229,7 @@ public final class FileTransferObject implements Serializable {
     private void receiveAnswerImagesForGallery(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         receiveMultipleImages(ois);
         specifiedObject = new IImageRequestAnswer() {
+            @Override
             public UserImageTriple[] getImages() {
                 return wrapImagesInTriples();
             }
@@ -225,10 +239,12 @@ public final class FileTransferObject implements Serializable {
     private void receiveImagesForGalleryRequest(ObjectInputStream ois) throws IOException {
         amount = ois.readInt();
         specifiedObject = new IGalleryImageRequest() {
+            @Override
             public int getAmountRequested() {
                 return amount;
             }
 
+            @Override
             public String getRequester() {
                 return senders[0];
             }
@@ -239,18 +255,22 @@ public final class FileTransferObject implements Serializable {
         receiver = (String) ois.readObject();
         receiveMultipleImages(ois);
         specifiedObject = new IImageForUser() {
+            @Override
             public String getSender() {
                 return senders[0];
             }
 
+            @Override
             public String getReceiver() {
                 return receiver;
             }
 
+            @Override
             public String getFileName() {
                 return fileNames[0];
             }
 
+            @Override
             public byte[] getImageBytes() {
                 return data[0];
             }
@@ -260,14 +280,17 @@ public final class FileTransferObject implements Serializable {
     private void receiveImageForSharing(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         receiveMultipleImages(ois);
         specifiedObject = new IImageForSharing() {
+            @Override
             public String getSender() {
                 return senders[0];
             }
 
+            @Override
             public String getFileName() {
                 return fileNames[0];
             }
 
+            @Override
             public byte[] getImageBytes() {
                 return data[0];
             }
