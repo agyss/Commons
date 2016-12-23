@@ -396,6 +396,7 @@ public class FileTransferObjectTest {
         assertThat(files[3].length()).isEqualTo(imageTriples[1].getImageData().length);
         assertThat(files[3].getName()).isEqualTo(imageTriples[1].getImageName());
         assertThat(senders[3]).isEqualTo(imageTriples[1].getImageCreatorInformations().getUserName());
+
     }
 
     @Test
